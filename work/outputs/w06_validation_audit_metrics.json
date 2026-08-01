@@ -1,0 +1,14 @@
+{
+  "task": "ML-09 w06_validation_audit",
+  "paper_finding_A": "What Predicts Growth? (LR 71% acc) - base rate ~0.62 => ~9 pts skill; random 80/20 not brand-grouped; growth label derived from impression change",
+  "paper_finding_B": "What Predicts Health? (RF importance) - health score constructed from position/impressions => label-derived; paper discloses it",
+  "my_model_base_rate": 0.526,
+  "split_before_random_auc": 0.662,
+  "split_after_grouped_auc": 0.646,
+  "split_gap_auc": 0.016,
+  "split_before_random_p50": 0.84,
+  "split_after_grouped_p50": 0.84,
+  "leak_test_auc_with_ctr_last": 0.999,
+  "leakage_checklist": "passed (timeline / no-label-derived / no-flags / grouped / base-rate / top-feature-sane / OOF)",
+  "seed": 0
+}
