@@ -1,0 +1,18 @@
+{
+  "task": "ML-07 baseline_action_score",
+  "universe_visible_pages": 12023,
+  "universe_clients": 28,
+  "zero_click_pages_dropped": 1215,
+  "floored_universe_pages": 10808,
+  "queue_rows_under_capturing": 5307,
+  "signal_1_ctr_vs_position_verdict": "MIXED",
+  "signal_1_spearman_pos_ctr": -0.183,
+  "signal_2_extreme_tail_verdict": "FALSE",
+  "score": "missed_clicks_90d = max(0, expected_ctr - ctr)/100 * impressions_90d",
+  "reason_code": "under_capturing_vs_rank",
+  "action_label": "Rewrite title & meta to lift CTR",
+  "top10_distinct_clients": 5,
+  "top50_distinct_clients": 8,
+  "precision_at_50": null,
+  "precision_at_50_note": "deferred: single-snapshot labels are circular; needs forward label"
+}
