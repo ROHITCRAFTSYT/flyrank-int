@@ -1,0 +1,33 @@
+{
+  "task": "ML-08 w05_model",
+  "label": "ctr_last_30d > ctr_prev_30d (observed forward CTR improvement)",
+  "universe_pages": 8348,
+  "universe_clients": 28,
+  "base_rate": 0.526,
+  "split": "GroupKFold(5) by client + time-aware (features prev_30d/static, label last_30d)",
+  "seed": 0,
+  "sklearn_version": "1.9.0",
+  "precision_at_50": {
+    "base_rate (random)": 0.526,
+    "naive_mean_reversion": 0.74,
+    "baseline_ML07": 0.84,
+    "LogReg": 0.66,
+    "DecisionTree_d3": 0.7,
+    "RandomForest": 0.78,
+    "GradBoost": 0.84
+  },
+  "grouped_auc": {
+    "LogReg": 0.643,
+    "DecisionTree_d3": 0.643,
+    "RandomForest": 0.654,
+    "GradBoost": 0.646
+  },
+  "best_model_p50": {
+    "GradBoost": 0.84
+  },
+  "baseline_ML07_p50": 0.84,
+  "naive_mean_reversion_p50": 0.74,
+  "corr_ctrprev_y": -0.201,
+  "verdict": "tie at headline P@50 (~0.84) so rule not beaten at one-week capacity; model (GradBoost) pulls ahead at P@100 (front-loaded baseline decays); signal largely mean reversion (ctr_prev dominates); complexity not rewarded at the operating point",
+  "key_limitation": "position not held constant (no per-window rank in starter CSV) -> unconfounded label needs warehouse"
+}
