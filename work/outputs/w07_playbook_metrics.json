@@ -1,0 +1,61 @@
+{
+  "task": "ML-10 w07_action_playbook",
+  "built_on": "ML-07 rule (won ML-08 at P@50; audited ML-09) - queue order is the validated part",
+  "universe_pages": 10808,
+  "universe_clients": 28,
+  "actionable_pages": 6962,
+  "archetype_counts": {
+    "verify_tracking": 8,
+    "stale_refresh": 1415,
+    "thin_expand": 106,
+    "ctr_rewrite": 3778,
+    "striking_distance": 1655,
+    "monitor": 3846
+  },
+  "total_missed_clicks_90d": 66753.0,
+  "est_value_usd_where_cpc_known": 31364.39,
+  "cpc_coverage": 0.221,
+  "top50_pct_recoverable_clicks": 0.207,
+  "claim_level": {
+    "queue_order": "validated decision-support (P@50 0.84 vs base 0.53)",
+    "archetype_action": "directional guidance, not per-page validated"
+  },
+  "monitoring_baseline": {
+    "expected_ctr_by_band": {
+      "1": 0.07,
+      "2": 0.29,
+      "3": 0.33,
+      "4": 0.35,
+      "5": 0.31,
+      "6": 0.25,
+      "7": 0.23,
+      "8": 0.21,
+      "9": 0.23,
+      "10": 0.19,
+      "11": 0.22,
+      "12": 0.22,
+      "13": 0.22,
+      "14": 0.24,
+      "15": 0.22,
+      "16": 0.22,
+      "17": 0.215,
+      "18": 0.2,
+      "19": 0.18,
+      "20": 0.19
+    },
+    "actionable_fraction": 0.644,
+    "verify_tracking_count": 8,
+    "clients_present": 28,
+    "validated_precision_at_50": 0.84,
+    "base_rate_reference": 0.53,
+    "curve_drift_trigger_pct": 25,
+    "precision_floor_trigger": 0.53
+  },
+  "exports": {
+    "queue_csv": "work/outputs/content_action_playbook.csv (gitignored, regenerated)",
+    "figures": [
+      "work/figures/w07_archetype_mix.png",
+      "work/figures/w07_review_depth_curve.png"
+    ]
+  }
+}
