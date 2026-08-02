@@ -121,11 +121,11 @@
     <div class="abstract">
       <h2>Abstract</h2>
       <p style="margin-bottom:0">
-        A content team has more visible pages than review-hours, so the real question is not <em>“is this page bad?”</em> but <em>“which page does an editor open first?”</em>
-        Working from a 30,000-page anonymized slice of production search-console data (28 pseudonymized clients), I score each visible page by how far its click-through rate falls below <em>same-rank</em> peers — a transparent, position-adjusted CTR-deficit rule — and rank the review queue by it.
+        FlyRank publishes content straight into clients’ websites and then watches it in search, where pages rank and then quietly <em>decay</em> — rankings slip, clicks drop, and teams notice too late. FlyRank already triages this with hand-written flags (a health score, quick-win tags); the real question underneath them is <em>“which page should a human fix first?”</em> — and whether a learned model beats a transparent rule at that call.
+        Working from a 30,000-page anonymized slice of production search-console data (28 pseudonymized clients), I score each visible page by how far its click-through rate falls below <em>same-rank</em> peers — a position-adjusted CTR-deficit rule — and rank the review queue by it.
         To test whether a model does better, I built an <em>observed</em> forward label (did CTR improve the next month?) and raced four classifiers against the rule on a client-grouped, time-aware split.
-        At the operating point that matters — precision@50, one reviewer’s week — the rule <strong>ties</strong> the best model (≈0.84 vs a 0.53 base rate); the model only pulls ahead deeper in the queue, and most of the shared signal is mean reversion.
-        The deliverable is therefore a transparent rule turned into a human-reviewed <strong>action playbook</strong> with stated limits — decision-support for one portfolio, not a claim about what Google rewards.
+        At the operating point that matters — precision@50, one reviewer’s week — the rule <strong>ties</strong> the best model (≈0.84 vs a 0.53 base rate); it only loses ground deeper in the queue, and most of the shared signal is mean reversion.
+        The deliverable is a transparent rule turned into a human-reviewed <strong>action playbook</strong> with stated limits — decision-support for one content portfolio, not a claim about what Google rewards.
       </p>
     </div>
     <div class="key">
@@ -152,7 +152,10 @@
   <!-- INTRODUCTION -->
   <section id="intro">
     <h2>01 — Introduction</h2>
-    <p class="h2title">The decision is an ordering problem, so the metric is precision@K</p>
+    <p class="h2title">FlyRank’s content-decay problem, framed as an ordering decision</p>
+    <p>
+      <strong>The case study.</strong> FlyRank builds content as infrastructure — it researches, writes, and publishes pages straight into a client’s website, then watches search data and optimizes. The recurring failure mode is <em>decay</em>: a page ranks, earns clicks, and then slips as freshness fades or search intent drifts — usually unnoticed until the traffic is already gone. FlyRank triages this today with hand-written flags (a health score, quick-win tags, needs-attention markers) — thresholds chosen by hand that work and run in production, but that run out where signals get many, tangled, and shifting. This study lives in exactly that gap: on real, anonymized search data, can a trained model beat the rule at the single decision underneath every flag — <em>which page should a human open first?</em>
+    </p>
     <p>
       Picture a content editor on Monday morning. There are thousands of already-visible pages and about fifty review-hours in the week. At random order, clearing the backlog would take years, so only the very top of any list ever gets acted on. That single fact decides everything downstream: the product is not a verdict on each page, it is the <strong>ordering</strong>, and the honest metric is <strong>precision@K</strong> at real review capacity (K ≈ 50), not accuracy over a large, boring majority.
     </p>
