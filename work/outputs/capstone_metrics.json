@@ -1,0 +1,52 @@
+{
+  "task": "ML-11 capstone paper",
+  "visible_universe_pages": 12023,
+  "clients": 28,
+  "decision_universe_pages": 8348,
+  "base_rate": 0.526,
+  "precision_at_50": {
+    "base_rate (random)": 0.526,
+    "naive_mean_reversion": 0.74,
+    "baseline_ML07": 0.84,
+    "LogReg": 0.66,
+    "DecisionTree_d3": 0.7,
+    "RandomForest": 0.78,
+    "GradBoost": 0.84
+  },
+  "precision_at_100": {
+    "base_rate (random)": 0.526,
+    "naive_mean_reversion": 0.73,
+    "baseline_ML07": 0.73,
+    "LogReg": 0.7,
+    "DecisionTree_d3": 0.73,
+    "RandomForest": 0.78,
+    "GradBoost": 0.86
+  },
+  "grouped_auc_best": 0.634,
+  "random_auc_best": 0.667,
+  "leak_demo_auc_clean": 0.647,
+  "leak_demo_auc_with_outcome": 0.998,
+  "playbook_actionable_pages": 6643,
+  "archetype_counts": {
+    "verify_tracking": 8,
+    "stale_refresh": 1271,
+    "thin_expand": 94,
+    "ctr_rewrite": 3310,
+    "striking_distance": 1960,
+    "monitor": 4165
+  },
+  "total_recoverable_clicks_90d": 54642.0,
+  "top50_share_recoverable": 0.217,
+  "value_usd_where_cpc_known": 24284.24,
+  "cpc_coverage": 0.221,
+  "figures": [
+    "paper_ctr_vs_position.png",
+    "paper_model_vs_baseline.png",
+    "w07_archetype_mix.png",
+    "w07_review_depth_curve.png"
+  ],
+  "claim_levels": {
+    "queue_order": "validated decision-support (P@50 ~0.84 vs base ~0.53)",
+    "archetype_action": "directional guidance, not per-page validated"
+  }
+}

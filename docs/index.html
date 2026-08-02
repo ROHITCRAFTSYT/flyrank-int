@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which pages should an SEO editor review first? A position-adjusted CTR study</title>
+<meta name="description" content="A position-adjusted CTR-deficit rule ranks which already-visible pages an editor should review first — and an honest client-grouped forward test shows a learned model does not beat it at one-week capacity. Decision-support, built on the anonymized FlyRank ML-internship dataset.">
+<meta name="author" content="Rohit Madhavan">
+<meta property="og:title" content="Which pages should an SEO editor review first?">
+<meta property="og:description" content="A position-adjusted CTR-deficit rule ties a gradient-boosted model at precision@50 (~0.84 vs a 0.53 base rate), client-grouped and time-aware. The simple thing winning is a result, not a failure.">
+<meta property="og:type" content="article">
+<style>
+  :root{
+    --bg:#ffffff; --fg:#1a1d21; --muted:#5b636c; --faint:#8a929b;
+    --accent:#1c6b4a; --accent2:#2f9e6f; --line:#e6e9ec; --card:#f6f8f7;
+    --codebg:#f2f4f3; --warn-bg:#fbf3e7; --warn-line:#e0a63c;
+    --measure:44rem;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1214; --fg:#e6e9ec; --muted:#a6adb5; --faint:#727a82;
+      --accent:#4cc38a; --accent2:#3fae7a; --line:#242a2e; --card:#161b1e;
+      --codebg:#161b1e; --warn-bg:#241d10; --warn-line:#8a6a25;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#ffffff; --fg:#1a1d21; --muted:#5b636c; --faint:#8a929b;
+    --accent:#1c6b4a; --accent2:#2f9e6f; --line:#e6e9ec; --card:#f6f8f7;
+    --codebg:#f2f4f3; --warn-bg:#fbf3e7; --warn-line:#e0a63c;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1214; --fg:#e6e9ec; --muted:#a6adb5; --faint:#727a82;
+    --accent:#4cc38a; --accent2:#3fae7a; --line:#242a2e; --card:#161b1e;
+    --codebg:#161b1e; --warn-bg:#241d10; --warn-line:#8a6a25;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font:400 18px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-feature-settings:"kern" 1;
+  }
+  .wrap{max-width:var(--measure); margin:0 auto; padding:0 20px}
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  header.masthead{border-bottom:1px solid var(--line); padding:56px 0 34px; margin-bottom:8px}
+  .eyebrow{font-size:13px; letter-spacing:.09em; text-transform:uppercase; color:var(--accent2); font-weight:600; margin:0 0 14px}
+  h1{font-size:clamp(28px,5vw,42px); line-height:1.15; letter-spacing:-.02em; margin:0 0 16px; font-weight:700}
+  .lede{font-size:20px; color:var(--muted); margin:0 0 22px; max-width:38rem}
+  .byline{font-size:15px; color:var(--muted); margin:0 0 20px}
+  .byline strong{color:var(--fg)}
+  .pills{display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 4px}
+  .pill{font-size:13px; padding:5px 11px; border:1px solid var(--line); border-radius:999px; color:var(--muted); background:var(--card)}
+  .pill.link{color:var(--accent); border-color:color-mix(in srgb,var(--accent) 35%, var(--line))}
+  section{padding:30px 0; border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:0}
+  h2{font-size:13px; letter-spacing:.09em; text-transform:uppercase; color:var(--accent2); font-weight:700; margin:0 0 6px}
+  h2 + .h2title{font-size:26px; line-height:1.25; letter-spacing:-.01em; margin:0 0 18px; font-weight:700}
+  h3{font-size:19px; margin:26px 0 8px; font-weight:650}
+  p{margin:0 0 16px}
+  ul,ol{margin:0 0 16px; padding-left:22px}
+  li{margin:0 0 8px}
+  strong{font-weight:650}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.86em; background:var(--codebg); padding:1px 5px; border-radius:5px}
+  .abstract{background:var(--card); border:1px solid var(--line); border-left:3px solid var(--accent2); border-radius:10px; padding:22px 24px; margin:6px 0 6px}
+  .abstract h2{margin-top:0}
+  .callout{background:var(--warn-bg); border:1px solid var(--warn-line); border-radius:10px; padding:16px 20px; margin:20px 0; font-size:16px}
+  .callout .k{font-weight:700; color:var(--fg)}
+  figure{margin:24px 0; padding:0}
+  figure img{width:100%; height:auto; display:block; border:1px solid var(--line); border-radius:10px; background:#fff}
+  figcaption{font-size:14.5px; color:var(--muted); margin-top:10px; padding-left:2px}
+  figcaption b{color:var(--fg)}
+  .tablescroll{overflow-x:auto; margin:20px 0; border:1px solid var(--line); border-radius:10px}
+  table{border-collapse:collapse; width:100%; font-size:15px; min-width:520px}
+  th,td{padding:9px 13px; text-align:left; border-bottom:1px solid var(--line)}
+  thead th{background:var(--card); font-size:12.5px; letter-spacing:.03em; text-transform:uppercase; color:var(--muted)}
+  tbody tr:last-child td{border-bottom:0}
+  td.num{font-variant-numeric:tabular-nums; text-align:right}
+  tr.hi td{background:color-mix(in srgb,var(--accent2) 10%, transparent); font-weight:600}
+  .toc{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 20px; margin:20px 0}
+  .toc h2{margin-bottom:8px}
+  .toc ol{margin:0; padding-left:20px; columns:2; column-gap:28px}
+  .toc li{margin:4px 0; font-size:15px}
+  .key{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin:22px 0}
+  .stat{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px}
+  .stat .v{font-size:26px; font-weight:700; letter-spacing:-.01em; color:var(--accent)}
+  .stat .l{font-size:13.5px; color:var(--muted); margin-top:2px; line-height:1.4}
+  footer{padding:38px 0 60px; color:var(--muted); font-size:14.5px}
+  footer a{color:var(--accent)}
+  .credit{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 22px; margin:8px 0 20px}
+  .themebtn{position:fixed; top:14px; right:14px; z-index:10; background:var(--card); color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:7px 13px; font-size:13px; cursor:pointer}
+  @media (max-width:640px){
+    body{font-size:17px}
+    .toc ol{columns:1}
+    header.masthead{padding:40px 0 28px}
+  }
+</style>
+</head>
+<body>
+<button class="themebtn" id="themebtn" aria-label="Toggle light/dark theme">◐ theme</button>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">FlyRank ML Internship · Capstone · CTR / Engagement Opportunity Scoring</p>
+    <h1>Which already-visible pages should an SEO editor review first?</h1>
+    <p class="lede">A position-adjusted CTR-deficit rule ranks the queue — and an honest, client-grouped forward test shows a gradient-boosted model does not beat it at one-week review capacity.</p>
+    <p class="byline">By <strong>Rohit Madhavan</strong> · 2 August 2026 · Decision-support study on the anonymized FlyRank ML-internship dataset (30,000 pages, 28 clients)</p>
+    <div class="pills">
+      <a class="pill link" href="https://github.com/ROHITCRAFTSYT/flyrank-int">GitHub repo ↗</a>
+      <a class="pill link" href="https://github.com/ROHITCRAFTSYT/flyrank-int/blob/main/work/notebooks/capstone.ipynb">Capstone notebook ↗</a>
+      <a class="pill link" href="https://flyrank.ai">Data: flyrank.ai ↗</a>
+      <span class="pill">Reproducible · seed 0</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ABSTRACT -->
+  <section id="abstract">
+    <div class="abstract">
+      <h2>Abstract</h2>
+      <p style="margin-bottom:0">
+        A content team has more visible pages than review-hours, so the real question is not <em>“is this page bad?”</em> but <em>“which page does an editor open first?”</em>
+        Working from a 30,000-page anonymized slice of production search-console data (28 pseudonymized clients), I score each visible page by how far its click-through rate falls below <em>same-rank</em> peers — a transparent, position-adjusted CTR-deficit rule — and rank the review queue by it.
+        To test whether a model does better, I built an <em>observed</em> forward label (did CTR improve the next month?) and raced four classifiers against the rule on a client-grouped, time-aware split.
+        At the operating point that matters — precision@50, one reviewer’s week — the rule <strong>ties</strong> the best model (≈0.84 vs a 0.53 base rate); the model only pulls ahead deeper in the queue, and most of the shared signal is mean reversion.
+        The deliverable is therefore a transparent rule turned into a human-reviewed <strong>action playbook</strong> with stated limits — decision-support for one portfolio, not a claim about what Google rewards.
+      </p>
+    </div>
+    <div class="key">
+      <div class="stat"><div class="v">≈6×</div><div class="l">CTR spread within a single position band</div></div>
+      <div class="stat"><div class="v">0.84</div><div class="l">precision@50 — rule ties the model (base rate 0.53)</div></div>
+      <div class="stat"><div class="v">21.7%</div><div class="l">of recoverable clicks sit in the top-50 of the queue</div></div>
+      <div class="stat"><div class="v">28</div><div class="l">clients — a small panel, grouped in every split</div></div>
+    </div>
+    <div class="toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#intro">Introduction</a></li>
+        <li><a href="#data">Data</a></li>
+        <li><a href="#method">Methodology</a></li>
+        <li><a href="#results">Results vs baseline</a></li>
+        <li><a href="#limits">Limitations</a></li>
+        <li><a href="#recs">Ranked recommendations</a></li>
+        <li><a href="#repro">Reproducibility</a></li>
+        <li><a href="#ack">Acknowledgments &amp; data credit</a></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- INTRODUCTION -->
+  <section id="intro">
+    <h2>01 — Introduction</h2>
+    <p class="h2title">The decision is an ordering problem, so the metric is precision@K</p>
+    <p>
+      Picture a content editor on Monday morning. There are thousands of already-visible pages and about fifty review-hours in the week. At random order, clearing the backlog would take years, so only the very top of any list ever gets acted on. That single fact decides everything downstream: the product is not a verdict on each page, it is the <strong>ordering</strong>, and the honest metric is <strong>precision@K</strong> at real review capacity (K ≈ 50), not accuracy over a large, boring majority.
+    </p>
+    <p>
+      There is genuine signal to rank on. Among pages with real exposure, click-through rate varies about <strong>six-fold within a single position band</strong> — on page one, 0.12% CTR at the 25th percentile against 0.75% at the 90th. If rank alone decided clicks, that spread would be tight. It isn’t, and the leftover — how far a page under-captures clicks <em>versus peers at the same position</em> — is exactly what a human could act on.
+    </p>
+    <p>
+      <strong>The cost of a wrong call is asymmetric,</strong> which is why the ordering has to be trustworthy at the top. A false positive costs an editor an hour and, worse, a little trust in the queue — burn people twice and they stop using it. A false negative is invisible: a genuinely under-earning page never surfaces. And the dangerous case is recommending a rewrite for a page whose low CTR is <em>correct</em> — one ranking for a query it shouldn’t match. So the whole design optimizes the top of the list and hands every final judgment to a person.
+    </p>
+  </section>
+
+  <!-- DATA -->
+  <section id="data">
+    <h2>02 — Data</h2>
+    <p class="h2title">A public, anonymized slice — described exactly, claimed narrowly</p>
+    <p>
+      All results here come from the one dataset that ships publicly with the internship repo: <code>content_refresh_anonymized.csv</code> — a <strong>30,000-row anonymized slice</strong> of content-performance data, one row per pseudonymized content item, carrying observed search/engagement metrics, content metadata, freshness fields, and two nested 30-day comparison windows. It contains <strong>no client names, domains, URLs, page titles, keywords, or raw queries</strong> — only hashed IDs and numeric/categorical metrics. Rate columns are percentages on a 0–100 scale (a <code>ctr</code> value of 0.24 means 0.24%, verified against raw click/impression counts, not taken on faith).
+    </p>
+    <p>
+      <strong>Date windows.</strong> Metrics are a 90-day snapshot. The file’s only forward seam is its split of impressions/clicks/sessions into <code>prev_30d</code> (days 31–60) and <code>last_30d</code> (days 1–30); that seam becomes the modeling label in §3.
+    </p>
+    <p>
+      <strong>What I excluded, and why.</strong> I keep only <em>visible</em> pages an editor could actually open: at least 500 impressions in 90 days (enough exposure to rank on), an average position between 1 and 20 (a page with none can’t be compared to a tier — <code>avg_position == 0</code> means <em>no data</em>, not rank zero), and at least 90 days old (too-new pages can’t be judged). That leaves <strong>12,023 visible pages across 28 clients</strong> — 40% of the slice. Pseudonymous IDs are used only for grouping and splitting, never as model features.
+    </p>
+    <div class="tablescroll">
+      <table>
+        <thead><tr><th>Filter step</th><th class="num">Pages remaining</th></tr></thead>
+        <tbody>
+          <tr><td>Starter slice (deduplicated by content&nbsp;id)</td><td class="num">30,000</td></tr>
+          <tr><td>+ impressions ≥ 500 / 90d</td><td class="num">~21,000</td></tr>
+          <tr><td>+ average position in (0, 20]</td><td class="num">~13,000</td></tr>
+          <tr class="hi"><td>+ content age ≥ 90 days → <b>visible universe</b></td><td class="num">12,023</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="color:var(--muted);font-size:15.5px">
+      Honesty note on scale: this paper analyzes the <em>public 30k slice</em>, not the full production warehouse. Where the analysis hits a wall it can’t clear here — holding search position constant between windows — the full daily-facts release is named as the right home for the unconfounded version, never hand-waved as already done.
+    </p>
+  </section>
+
+  <!-- METHODOLOGY -->
+  <section id="method">
+    <h2>03 — Methodology</h2>
+    <p class="h2title">A one-line rule, an observed forward label, and a split that can’t cheat</p>
+
+    <h3>The score (the shipped rule)</h3>
+    <p>
+      For each rounded position band, <code>expected_ctr</code> is the band’s median CTR — the CTR-vs-rank curve. A page’s shortfall is
+      <code>missed_clicks_90d = max(0, expected_ctr − ctr) / 100 × impressions_90d</code>: the clicks it leaves on the table versus same-rank peers. Rank the queue by that. The whole rule is one transparent, auditable line — no black box to trust.
+    </p>
+    <figure>
+      <img src="figures/paper_ctr_vs_position.png" alt="Box plot of CTR by rounded search position, showing a wide spread within each band and a non-monotonic median curve.">
+      <figcaption><b>The curve the rule rests on.</b> Median CTR by position is real but shallow, and the within-band spread is enormous — so a flat CTR threshold would punish every well-ranked page and forgive every poorly-ranked one. Comparing each page only to its own band is the correction that makes the score fair. (The dip at position 1 is a genuine property of this slice, not an error.)</figcaption>
+    </figure>
+
+    <h3>The label (to test the rule honestly)</h3>
+    <p>
+      A single 90-day snapshot cannot yield a label the rule isn’t already peeking at — so I use the forward seam. The decision moment is the end of <code>prev_30d</code>; features are strictly pre-decision; and the outcome is <em>observed</em>, binary, and measured strictly later:
+      <code>y = ctr_last_30d &gt; ctr_prev_30d</code> — “did CTR improve next month?” The base rate is <strong>≈0.526</strong>, so any scorer worth shipping must clear that.
+    </p>
+
+    <h3>Validation design — two guards at once</h3>
+    <ul>
+      <li><strong>Time-aware</strong> — no feature reads the outcome window. Every 90-day column and every <code>last_30d</code> column is refused as a feature; that refusal <em>is</em> the guard.</li>
+      <li><strong>Grouped by client</strong> — <code>GroupKFold(5)</code> keeps every client wholly on one side of each fold, so a model can’t memorize a client from shared templates or tracking setups and “predict” its held-out pages. Model scores are out-of-fold.</li>
+    </ul>
+    <div class="callout">
+      <span class="k">Leakage, demonstrated not asserted.</span> Feeding the model a single outcome-window column (<code>ctr_last</code>) spikes held-out AUC from an honest <b>0.65</b> to <b>≈0.999</b>. That jump is what leakage looks like — and precisely why those columns stay banned. The full ML-09 checklist (timeline order, no label-derived features, no product flags, grouped split, base-rate reported, sane top feature, out-of-fold scoring) passed.
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results">
+    <h2>04 — Results vs baseline</h2>
+    <p class="h2title">At one-week capacity, the rule ties the model</p>
+    <p>
+      Same universe, same split, same metric for every scorer. Two floor baselines sit below the models on purpose: <code>naive_mean_reversion</code> (rank by lowest current CTR) measures how much of any score is just regression-to-the-mean, and <code>baseline_ML07</code> is the shipped rule re-expressed at the decision moment.
+    </p>
+    <div class="tablescroll">
+      <table>
+        <thead><tr><th>Scorer</th><th class="num">AUC (grouped)</th><th class="num">P@20</th><th class="num">P@50</th><th class="num">P@100</th></tr></thead>
+        <tbody>
+          <tr><td>base rate (random)</td><td class="num">—</td><td class="num">0.53</td><td class="num">0.53</td><td class="num">0.53</td></tr>
+          <tr><td>naive mean reversion <span style="color:var(--faint)">(floor)</span></td><td class="num">—</td><td class="num">0.75</td><td class="num">0.74</td><td class="num">0.73</td></tr>
+          <tr class="hi"><td>baseline — position-adjusted rule <b>(shipped)</b></td><td class="num">—</td><td class="num">0.80</td><td class="num">0.84</td><td class="num">0.73</td></tr>
+          <tr><td>Logistic Regression</td><td class="num">0.64</td><td class="num">0.65</td><td class="num">0.66</td><td class="num">0.70</td></tr>
+          <tr><td>Decision Tree (depth 3)</td><td class="num">0.64</td><td class="num">0.65</td><td class="num">0.70</td><td class="num">0.73</td></tr>
+          <tr><td>Random Forest</td><td class="num">0.65</td><td class="num">0.95</td><td class="num">0.78</td><td class="num">0.78</td></tr>
+          <tr><td>Gradient Boosting <span style="color:var(--faint)">(best model)</span></td><td class="num">0.65</td><td class="num">0.70</td><td class="num">0.84</td><td class="num">0.86</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure>
+      <img src="figures/paper_model_vs_baseline.png" alt="Grouped bar chart comparing precision@50 and precision@100 for random, mean-reversion, the rule, and the best model.">
+      <figcaption><b>No case for a black box at K=50.</b> The position-adjusted rule and gradient boosting both hit precision@50 ≈ 0.84, well above the 0.53 base rate. The model’s only real edge appears at P@100 (0.86 vs the rule’s 0.73), because the rule is front-loaded and decays deeper in the queue.</figcaption>
+    </figure>
+    <p>The honest, capacity-dependent reading:</p>
+    <ul>
+      <li><strong>At the headline K=50, the baseline is not beaten.</strong> For a one-reviewer-week queue, a one-line rule matches an opaque ensemble — so there is no case for switching. A simple thing winning is a legitimate, even preferred, result.</li>
+      <li><strong>The model only earns its keep deeper.</strong> If review capacity were larger than one week, gradient boosting’s steadier P@100 would pull ahead. Reporting the win <em>and</em> the loss at different K is the finding, not a footnote.</li>
+      <li><strong>Most of the shared signal is mean reversion.</strong> The naive floor alone reaches 0.74 of the rule’s 0.84; the position-adjustment adds the real ~+0.10; and the model’s dominant feature is <code>ctr_prev</code> — the same quantity the rule ranks on. Content features add little. No free lunch on this data.</li>
+    </ul>
+  </section>
+
+  <!-- LIMITATIONS -->
+  <section id="limits">
+    <h2>05 — Limitations &amp; honest framing</h2>
+    <p class="h2title">Every caveat carries a number</p>
+    <ul>
+      <li><strong>Not causal.</strong> “Worth reviewing first” is decision-support. There is no intervention in this data, so I never claim a rewrite <em>causes</em> a CTR lift.</li>
+      <li><strong>Position confound — the big one.</strong> CTR can rise next month because a page <em>ranked</em> better, not because anyone improved it. The slice has no per-window position to hold constant, so a slice of every score’s success is rank drift. The unconfounded verdict needs the warehouse’s daily rank and a true forward month.</li>
+      <li><strong>Small panel.</strong> 28 clients. Honesty costs little here — held-out AUC moves only from ~0.67 (random split) to ~0.63 (client-grouped), so the model isn’t heavily memorizing clients — but this is not a large or random sample of the web.</li>
+      <li><strong>Sparse value.</strong> Cost-per-click is known for only ~22% of the queue and is a benchmark, not booked revenue, so the dollar column is secondary to the click-based rank.</li>
+      <li><strong>Thin position bands.</strong> Bands 1–2 rest on few pages; <code>expected_ctr</code> there is shaky and used only as a loose hint.</li>
+      <li><strong>Not an SEO-algorithm claim.</strong> This models one portfolio’s outcomes in one period. It says nothing about what Google rewards.</li>
+    </ul>
+  </section>
+
+  <!-- RECOMMENDATIONS -->
+  <section id="recs">
+    <h2>06 — Ranked recommendations</h2>
+    <p class="h2title">The validated queue, turned into a human-reviewed playbook</p>
+    <p>
+      The validated part is the queue <strong>order</strong>. The shipped product wraps it: every actionable page gets one <em>archetype</em> by a documented first-match cascade, where the archetype’s action is <strong>directional guidance</strong> — deliberately kept separate from the validated ranking, because it is not a per-page prediction.
+    </p>
+    <div class="tablescroll">
+      <table>
+        <thead><tr><th>Archetype</th><th>When it fires</th><th>Recommended action</th><th>Automate?</th></tr></thead>
+        <tbody>
+          <tr><td><code>verify_tracking</code></td><td>CTR &lt; 0.03pp on ≥50k impressions (implausible)</td><td>Verify click tracking <b>before</b> any content work</td><td><b>No — human only</b></td></tr>
+          <tr><td><code>stale_refresh</code></td><td>under-capturing, age ≥180d, ≥90d since update</td><td>Refresh facts/dates, expand thin sections</td><td>Draft only</td></tr>
+          <tr><td><code>thin_expand</code></td><td>under-capturing, word count &lt; 1500</td><td>Expand depth where demand already exists</td><td>Draft only</td></tr>
+          <tr><td><code>ctr_rewrite</code></td><td>under-capturing, fresh + deep</td><td>Rewrite title &amp; meta to lift CTR</td><td>Draft only</td></tr>
+          <tr><td><code>striking_distance</code></td><td>not under-capturing, position 11–20</td><td>Improve relevance + internal links toward page 1</td><td>Draft only</td></tr>
+          <tr><td><code>monitor</code></td><td>at/above expected, page-1, fresh</td><td>Watch; no action this cycle</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure>
+      <img src="figures/w07_archetype_mix.png" alt="Horizontal bar chart of playbook queue composition by archetype.">
+      <figcaption><b>What the queue is made of.</b> Of the visible universe, <code>ctr_rewrite</code> and <code>stale_refresh</code> dominate the actionable work; only 8 pages trip the tracking-suspect flag — but several of those sit near the very top of the queue, which is exactly why nothing auto-publishes.</figcaption>
+    </figure>
+    <figure>
+      <img src="figures/w07_review_depth_curve.png" alt="Cumulative share of recoverable clicks against queue depth, rising steeply then flattening.">
+      <figcaption><b>Why the ordering pays off.</b> Recoverable clicks are front-loaded: the top 50 pages hold ~21.7% of all recoverable clicks, and the top 200 far more. A capacity-limited team gets most of the available upside by working the queue in order — which is the entire point of ranking.</figcaption>
+    </figure>
+    <p><strong>The no-go list — what must never be automated:</strong> auto-publishing any edit; acting on <code>verify_tracking</code> pages as content (fix tracking first); treating an archetype action as a prediction; ranking by dollar value alone (CPC is sparse); trusting thin-band order; and framing any of this as “what Google rewards.” Every row requires human review before action; zero rows auto-publish, by rule.</p>
+  </section>
+
+  <!-- REPRODUCIBILITY -->
+  <section id="repro">
+    <h2>07 — Reproducibility</h2>
+    <p class="h2title">Clone, install, Run All — same numbers</p>
+    <p>Everything on this page is regenerated by one notebook from the public slice, no token needed. Random seed is fixed at 0; tree-ensemble numbers can shift a point or two across scikit-learn versions (this run used 1.9.0).</p>
+    <div class="tablescroll">
+      <table>
+        <thead><tr><th>Artifact</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr><td>Repository</td><td><a href="https://github.com/ROHITCRAFTSYT/flyrank-int">github.com/ROHITCRAFTSYT/flyrank-int</a></td></tr>
+          <tr><td>Capstone notebook (mirrors this paper, regenerates every figure)</td><td><a href="https://github.com/ROHITCRAFTSYT/flyrank-int/blob/main/work/notebooks/capstone.ipynb"><code>work/notebooks/capstone.ipynb</code></a></td></tr>
+          <tr><td>Per-stage notebooks (framing → baseline → model → validation → playbook)</td><td><a href="https://github.com/ROHITCRAFTSYT/flyrank-int/tree/main/work/notebooks"><code>work/notebooks/</code></a></td></tr>
+          <tr><td>Committed metrics receipts (safe aggregates, no IDs)</td><td><a href="https://github.com/ROHITCRAFTSYT/flyrank-int/tree/main/work/outputs"><code>work/outputs/*.json</code></a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:15.5px;color:var(--muted)">Steps: <code>git clone</code> → <code>pip install -r requirements.txt</code> → open the capstone notebook → <em>Run all</em>. The notebook clones the public starter data automatically in Colab; locally it reads <code>data/raw/content_refresh_anonymized.csv</code>.</p>
+  </section>
+
+  <!-- ACKNOWLEDGMENTS -->
+  <section id="ack">
+    <h2>08 — Acknowledgments &amp; data credit</h2>
+    <p class="h2title">Built on real data, credited properly</p>
+    <div class="credit">
+      <p style="margin:0">
+        Built on the <strong>FlyRank ML Internship dataset</strong> — an anonymized slice of real production search-console and engagement data — provided through the FlyRank ML internship program. Data source: <a href="https://flyrank.ai"><strong>flyrank.ai</strong></a>. Crediting the data source is standard research practice, and it signals the data is real rather than synthetic.
+      </p>
+    </div>
+    <p>
+      Thanks to the internship’s mentors and the intern-guide skills that shaped the discipline behind this work: framing a decision before a model, writing a data contract, hunting leakage, comparing honestly against a baseline, and refusing to overclaim. The recurring lesson across seven weeks — that a well-understood “the simple rule wins” is a real result — is the finding I’m proudest of here.
+    </p>
+  </section>
+
+  <footer>
+    <p><strong>Claim language.</strong> Every result on this page is <em>observed / measured / directional / decision-support</em>. Nothing here is causal, nothing describes a search engine’s algorithm, and no client names, domains, URLs, or raw queries appear anywhere — only pseudonymous IDs and aggregates.</p>
+    <p>© 2026 Rohit Madhavan · <a href="https://github.com/ROHITCRAFTSYT/flyrank-int">source repository</a> · data credit <a href="https://flyrank.ai">flyrank.ai</a></p>
+  </footer>
+</main>
+
+<script>
+  (function(){
+    var btn = document.getElementById('themebtn');
+    var root = document.documentElement;
+    btn.addEventListener('click', function(){
+      var cur = root.getAttribute('data-theme');
+      var next = cur === 'dark' ? 'light' : (cur === 'light' ? 'dark' :
+                 (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark'));
+      root.setAttribute('data-theme', next);
+    });
+  })();
+</script>
+</body>
+</html>
